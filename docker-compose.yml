@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+
+  elasticsearch:
+    image: elasticsearch:8.5.3
+    container_name: elasticsearch
+    restart: unless-stopped
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: kibana:8.5.3
+    container_name: kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=db_posts
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+  
+  admin:
+    image: adminer
+    container_name: phpAdmin
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  postgres-db:
+  elasticsearch-data:
